@@ -31,6 +31,7 @@ def test_proxy(proxy):
         response = requests.get(TEST_TVMORE, timeout=1, proxies=proxies)
         if not response.ok or 'json' not in response.headers['Content-Type']:
             return False
+        return True
     except requests.RequestException:
         return False
 
