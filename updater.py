@@ -2,9 +2,12 @@ import json
 import requests
 import re
 from os import path
+from requests import Timeout
+
 
 LOCAL_PROXY_FILE = path.join(path.dirname(__file__), 'proxy.json')
 GIMME_PROXY_API = 'http://gimmeproxy.com/api/getProxy?country=CN&protocol=http&anonymityLevel=1'
+INCLOAK_PROXY_PAGE = 'https://incloak.com/proxy-list/?country=CN&anon=34'
 
 
 def read_local_list():
@@ -21,22 +24,34 @@ def request_proxy():
 
 def test_proxy(proxy):
     try:
+        print('testing %s' % proxy)
         response = requests.get('http://baidu.com', timeout=2, proxies={'http': 'http://%s' % proxy})
         return re.search('www\.baidu\.com', response.text) is not None
-    except:
+    except Timeout:
         return False
 
 
 def collect_proxy_addresses():
-    return collect_from_gimme()
+    total = collect_from_gimme() + collect_from_incloak()
+    return [proxy for proxy in list(set(total)) if test_proxy(proxy)]
+
+
+def collect_from_incloak():
+    print('collecting from incloak')
+    response = requests.get(INCLOAK_PROXY_PAGE)
+    if response.ok:
+        proxy_list = re.findall('>\s*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\s*</td>\s*<td>\s*([0-9]+)\s*</td>', response.text)
+        if len(proxy_list):
+            return [':'.join(proxy) for proxy in proxy_list]
+    return []
 
 
 def collect_from_gimme():
+    print('collecting from gimme')
     fetch_one = request_proxy()
-    if fetch_one and test_proxy(fetch_one):
+    if fetch_one:
         return [fetch_one]
-    else:
-        return []
+    return []
 
 
 def save_local_list(proxy_list):
