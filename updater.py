@@ -6,6 +6,7 @@ from os import path
 LOCAL_PROXY_FILE = path.join(path.dirname(__file__), 'proxy.json')
 GIMME_PROXY_API = 'http://gimmeproxy.com/api/getProxy?country=CN&protocol=http&anonymityLevel=1'
 INCLOAK_PROXY_PAGE = 'https://incloak.com/proxy-list/?country=CN&anon=34'
+TEST_TVMORE = 'http://vod.tvmore.com.cn/Service/TreeSite?code=program_site'
 
 
 def read_local_list():
@@ -22,9 +23,14 @@ def request_proxy():
 
 def test_proxy(proxy):
     try:
+        proxies = {'http': 'http://%s' % proxy}
         print('testing %s' % proxy)
-        response = requests.get('http://baidu.com', timeout=1, proxies={'http': 'http://%s' % proxy})
-        return re.search('www\.baidu\.com', response.text) is not None
+        response = requests.get('http://baidu.com', timeout=1, proxies=proxies)
+        if not response.ok or re.search('www\.baidu\.com', response.text) is None:
+            return False
+        response = requests.get(TEST_TVMORE, timeout=1, proxies=proxies)
+        if not response.ok or 'json' not in response.headers['Content-Type']:
+            return False
     except requests.RequestException:
         return False
 
