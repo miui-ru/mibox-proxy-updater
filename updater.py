@@ -8,7 +8,7 @@ GIMME_PROXY_API = 'http://gimmeproxy.com/api/getProxy?country=CN&protocol=http&a
 INCLOAK_PROXY_PAGE = 'https://incloak.com/proxy-list/?country=CN&anon=34'
 TEST_TVMORE = 'http://vod.tvmore.com.cn/Service/TreeSite?code=program_site'
 TEST_OTTCN = 'http://media.v2.t001.ottcn.com/tvservice/getmediaurl?mediaid=10015143&deviceid=1'
-
+TEST_SOHU = 'http://tv.sohu.com/20150519/n413355295.shtml'
 
 def read_local_list():
     with open(LOCAL_PROXY_FILE, 'r') as f:
@@ -37,6 +37,10 @@ def test_proxy(proxy):
 
         response = requests.get(TEST_OTTCN, timeout=1, proxies=proxies)
         if not response.ok or 'json' not in response.headers['Content-Type']:
+            return False
+
+        response = requests.get(TEST_SOHU, timeout=1, proxies=proxies)
+        if not response.ok:
             return False
 
         return True
