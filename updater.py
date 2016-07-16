@@ -2,7 +2,6 @@ import json
 import requests
 import re
 from os import path
-from requests import Timeout
 
 LOCAL_PROXY_FILE = path.join(path.dirname(__file__), 'proxy.json')
 GIMME_PROXY_API = 'http://gimmeproxy.com/api/getProxy?country=CN&protocol=http&anonymityLevel=1'
@@ -26,7 +25,7 @@ def test_proxy(proxy):
         print('testing %s' % proxy)
         response = requests.get('http://baidu.com', timeout=1, proxies={'http': 'http://%s' % proxy})
         return re.search('www\.baidu\.com', response.text) is not None
-    except Timeout:
+    except requests.RequestException:
         return False
 
 
