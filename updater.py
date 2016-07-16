@@ -1,7 +1,6 @@
 import json
 import requests
 import re
-from time import sleep
 from os import path
 
 LOCAL_PROXY_FILE = path.join(path.dirname(__file__), 'proxy.json')
@@ -66,6 +65,4 @@ def main():
     update_squid_conf(proxy_list)
 
 if __name__ == '__main__':
-    while True:
-        main()
-        sleep(60)
+    main()
